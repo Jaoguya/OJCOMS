@@ -963,7 +963,7 @@ def test_dirty_marker_ignores_a_runs_own_output():
         "Experiment Configuration/global.yaml",
         "Common/crypto/config.py",
         "infra/fleet.sh",
-        "SystemConfiguration.md",
+        "skill.md",
         # A result dir holding something OTHER than the three known artifacts
         # is not recognised output and must still count.
         "Schemes/ma_lb_pq_vdse/exp7_search_throughput__aass/patch.py",

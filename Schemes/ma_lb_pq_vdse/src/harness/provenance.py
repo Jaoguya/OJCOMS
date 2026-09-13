@@ -369,7 +369,7 @@ def reportability(
         # nothing here performed one: a run against a DIFFERENT corpus than the
         # campaign was frozen on would have passed this gate and been marked
         # reportable, which is precisely the silent data swap
-        # dataset.yaml's freeze pin exists to prevent (SystemConfiguration.md, "The corpus
+        # dataset.yaml's freeze pin exists to prevent (skill.md, "The corpus
         # is frozen"). Dataset/corpus.py guards its own loader, but a scheme
         # that obtains a digest another way bypassed that entirely. Checked
         # here so the gate matches what it claims. Added 2026-08-28.
@@ -411,7 +411,7 @@ def reportability(
     # is ever brought inside the boundary, the runner must pass a ledger and
     # ``exp6_authorization_sync`` must come back into this tuple.
     if _experiment_number(experiment) == 4 and not ledger_faithful:
-        # SystemConfiguration.md states the ledger is Hyperledger Fabric v2.5, but the
+        # skill.md states the ledger is Hyperledger Fabric v2.5, but the
         # harness runs chain.ledger.InProcessLedger -- whose OWN docstring says
         # it is "NOT a substitute for Fabric once Fog Search Nodes become
         # independent processes" and that "Exp. 4 is where it starts to be
@@ -423,7 +423,7 @@ def reportability(
         # 2026-08-28.
         reasons.append(
             "the ledger is an in-process hash chain, not the Hyperledger "
-            "Fabric v2.5 deployment SystemConfiguration.md specifies; Exp. 4's chain-"
+            "Fabric v2.5 deployment skill.md specifies; Exp. 4's chain-"
             "consistency cost is therefore understated (see "
             "chain/ledger.py::InProcessLedger)"
         )
@@ -451,7 +451,7 @@ def reportability(
         # cannot be asserted by a caller that did not spawn them.
         if config.topology.independent_processes and not fsn_processes:
             reasons.append(
-                "SystemConfiguration.md requires each FSN to be an independent process; this "
+                "skill.md requires each FSN to be an independent process; this "
                 "run executed them in one interpreter, so a concurrency result "
                 "would not measure the stated topology"
             )

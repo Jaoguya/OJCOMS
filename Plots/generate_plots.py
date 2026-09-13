@@ -3,7 +3,7 @@
     python3 Plots/generate_plots.py --input Schemes --output Plots/output
 
 Walks ``Schemes/*/exp<N>_*/results.csv`` and emits one figure per experiment
-(SystemConfiguration.md). Schemes with no ``results.csv`` for an experiment are skipped,
+(plotgen.md). Schemes with no ``results.csv`` for an experiment are skipped,
 so a partial campaign still plots — that is deliberate: the campaign runs
 per-scheme on separate instances and finishes at different times.
 
@@ -17,7 +17,7 @@ policy-state-aware form and nothing else as of 2026-09-12, the prefix is gone,
 and all five schemes now write the same directory names. ``--construction`` is
 kept and accepts only ``psa``.
 
-FIGURE CONVENTIONS (SystemConfiguration.md, followed exactly)
+FIGURE CONVENTIONS (plotgen.md, followed exactly)
 -------------------------------------------------
 * Vector PDF, single-column width.
 * 8 pt minimum type size anywhere on the figure.
@@ -30,7 +30,7 @@ FIGURE CONVENTIONS (SystemConfiguration.md, followed exactly)
 WHAT THIS SCRIPT DELIBERATELY DOES NOT DO
 -----------------------------------------
 It does not aggregate, derive, interpolate or smooth. Every plotted value is
-read verbatim from a ``results.csv`` cell, so that SystemConfiguration.md's "every numeric
+read verbatim from a ``results.csv`` cell, so that plotgen.md's "every numeric
 claim in §VI traces to a results.csv cell" stays literally true. A missing or
 malformed row is reported and skipped, never filled in.
 
@@ -296,7 +296,7 @@ EXPERIMENTS: Tuple[ExperimentSpec, ...] = (
     # the per-update cost is all sender-side (authorization evolution, index
     # evolution, Merkle path update, message build). A latency-only figure
     # would leave the SELECTIVE half of the claim with no evidence at all,
-    # which is exactly what SystemConfiguration.md's "selective propagation"
+    # which is exactly what plotgen.md's "selective propagation"
     # asks the experiment to show.
     #
     # Panel (b) is the DELIVERED PAYLOAD: bytes leaving the AIM per update,
@@ -469,7 +469,7 @@ ABLATION_STYLE_SLOT: Dict[str, int] = {
     # should read that way: slot 0 (the proposed scheme's blue circle) is
     # |P_U| = 1, the baseline scope, and the rest step up from there. Without
     # these four entries all four curves drew in one colour and the figure
-    # could not be read at all in grayscale, which SystemConfiguration.md requires.
+    # could not be read at all in grayscale, which plotgen.md requires.
     # "Proposed" is the sole Exp. 1 arm drawn since 2026-09-13; slot 0 is the
     # proposed scheme's blue circle, the same style it carries in every other
     # figure. The three |P_U| labels stay for the commented-out arms.
@@ -1119,7 +1119,7 @@ def collect(input_root: Path, spec: ExperimentSpec) -> List[Series]:
 # ---------------------------------------------------------------------------
 # Plotting
 # ---------------------------------------------------------------------------
-# IEEE single-column is 3.5 in. 8 pt is SystemConfiguration.md's stated minimum, so every
+# IEEE single-column is 3.5 in. 8 pt is plotgen.md's stated minimum, so every
 # text element is set at or above it.
 plt.rcParams.update({
     "font.size": 8,
@@ -1762,7 +1762,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                              "is not reportable:true")
     parser.add_argument("--format", default="pdf",
                         help="output format(s), comma-separated, e.g. 'pdf' or "
-                             "'pdf,png'. SystemConfiguration.md wants vector for the paper, "
+                             "'pdf,png'. plotgen.md wants vector for the paper, "
                              "so pdf stays the default. With MORE THAN ONE "
                              "format each goes in its own subdirectory "
                              "(<output>/pdf/, <output>/png/) so a raster copy "

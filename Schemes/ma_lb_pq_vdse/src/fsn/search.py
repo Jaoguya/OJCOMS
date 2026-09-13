@@ -242,7 +242,7 @@ def execute_search_across(
     encrypted-search operations over unrelated domains are avoided" claim.
 
     Each node is searched independently and no state crosses between them —
-    SystemConfiguration.md makes them separate processes, and a shared intermediate here would
+    global.yaml makes them separate processes, and a shared intermediate here would
     not survive that split.
     """
     responses = []

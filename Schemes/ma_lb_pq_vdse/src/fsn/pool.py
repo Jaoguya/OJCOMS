@@ -1,6 +1,6 @@
 """Run each Fog Search Node as an INDEPENDENT OS PROCESS.
 
-SystemConfiguration.md states: "Each FSN is an independent process holding its own index
+global.yaml states: "Each FSN is an independent process holding its own index
 shard, authorization version ``VID_j``, and request queue." The harness
 replayed all of them inside one interpreter, which
 ``provenance.reportability()`` correctly refused to call a concurrency result:

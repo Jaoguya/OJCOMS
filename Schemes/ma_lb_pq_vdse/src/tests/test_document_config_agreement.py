@@ -39,12 +39,19 @@ import yaml
 REPO = Path(__file__).resolve().parents[4]
 GLOBAL_YAML = REPO / "Experiment Configuration" / "global.yaml"
 MANIFEST = REPO / "Dataset" / "dataset_manifest.json"
-OPERATOR_GUIDE = REPO / "SystemConfiguration.md"
+# skill.md, not SystemConfiguration.md. The latter was the operator guide
+# until it was deleted in 83b83ff, after which these three tests skipped on
+# "SystemConfiguration.md is not present" -- live-looking guards checking
+# nothing, which is the same silent-skip failure this file exists to catch.
+# CLAUDE.md names skill.md as the manual, so that is what they check now.
+OPERATOR_GUIDE = REPO / "skill.md"
 
 #: The two prose documents that survive the 2026-09-08 cull. A third should not
 #: appear: every document retired from this repo has left dangling citations
 #: behind, and the cost scales with how many there are to retire.
-PROSE_DOCS = ("CLAUDE.md", "SystemConfiguration.md")
+# skill.md replaced SystemConfiguration.md as the prose document whose
+# cited paths are checked; the latter was deleted in 83b83ff.
+PROSE_DOCS = ("CLAUDE.md", "skill.md")
 
 #: Top-level directories a repo-relative path can begin with.
 _REPO_DIRS = (
@@ -125,7 +132,7 @@ def test_operator_guide_agrees_with_the_corpus_manifest():
     one it never fired. The manifest is committed, so this always fires.
     """
     if not OPERATOR_GUIDE.is_file():
-        pytest.skip("SystemConfiguration.md is not present")
+        pytest.skip("skill.md is not present")
     if not MANIFEST.is_file():
         pytest.skip("dataset_manifest.json is not present")
 
@@ -146,7 +153,7 @@ def test_operator_guide_agrees_with_the_corpus_manifest():
     }
     absent = {name: value for name, value in expected.items() if value not in doc}
     assert not absent, (
-        f"SystemConfiguration.md no longer states these manifest facts: "
+        f"skill.md no longer states these manifest facts: "
         f"{absent}. Either the corpus was re-frozen and the document was not "
         f"updated, or a number was restated by hand and is wrong."
     )
@@ -162,11 +169,11 @@ NUMERIC_SWEEPS = ("exp7_search_throughput", "exp8_load_balance")
 @pytest.mark.parametrize("experiment", NUMERIC_SWEEPS)
 def test_operator_guide_states_the_configured_sweep_endpoint(experiment):
     if not OPERATOR_GUIDE.is_file():
-        pytest.skip("SystemConfiguration.md is not present")
+        pytest.skip("skill.md is not present")
     top = max(_configured()["experiments"][experiment]["values"])
     doc = OPERATOR_GUIDE.read_text(encoding="utf-8")
     assert f"{top:,}" in doc or str(top) in doc, (
-        f"{experiment} sweeps to {top:,}, and SystemConfiguration.md does not "
+        f"{experiment} sweeps to {top:,}, and skill.md does not "
         f"say so — a reader would plan a campaign against the wrong range"
     )
 
@@ -179,34 +186,43 @@ def test_operator_guide_states_the_configured_repetitions_in_prose():
     ``test_repetition_count_agreement.py`` could not see it.
     """
     if not OPERATOR_GUIDE.is_file():
-        pytest.skip("SystemConfiguration.md is not present")
+        pytest.skip("skill.md is not present")
     doc = OPERATOR_GUIDE.read_text(encoding="utf-8")
     stated = re.search(r"\*{0,2}(\d+)\*{0,2} measured runs", doc)
-    assert stated, "SystemConfiguration.md no longer states 'N measured runs'"
+    assert stated, "skill.md no longer states 'N measured runs'"
     configured = int(_configured()["measurement"]["repetitions"])
     assert int(stated.group(1)) == configured, (
-        f"SystemConfiguration.md says {stated.group(1)} measured runs; "
+        f"skill.md says {stated.group(1)} measured runs; "
         f"global.yaml says {configured}"
     )
-#: Prose documents deleted in the 2026-09-07/08 cull. A comment naming one of
-#: these sends a reader to a path that does not exist. `SystemConfiguration.md`
-#: section 8 holds the resolver table that replaced them.
+#: Prose documents that no longer exist. A comment naming one of these sends a
+#: reader to a path that does not exist.
+#:
+#: `SystemConfiguration.md` was itself the resolver this list used to point at
+#: ("section 8 holds the table that replaced them") and was deleted in 83b83ff
+#: with the 2026-09-12 structure revision. It went uncaught for a day because
+#: the guard against dead pointers did not list the document the guard's own
+#: comment cited. The eight-file set in CLAUDE.md is the replacement: skill.md
+#: for anything operational, the scheme documents for scheme specifics.
+#:
+#: Sorted, so a new entry has one obvious place to go.
 DELETED_DOCS = (
-    "SCHEME.md",
     "MANUSCRIPT_DIVERGENCE.md",
     "PHASE_III_PLAN.md",
     "PHASE_IV_PLAN.md",
+    "SCHEME.md",
+    "SystemConfiguration.md",
 )
 
 #: Files allowed to name a deleted document, and why. Each is an account of the
 #: deletion rather than a pointer at the deleted thing, so rewriting them would
 #: erase the history that explains the rule.
 _HISTORY = (
+    "DECISIONS.md",                        # closed archive, per CLAUDE.md
+    "SKILL.md",                            # records that README.md is gone
+    "bench-coder.md",                      # records when README.md was deleted
     "test_document_config_agreement.py",   # this file
     "test_repetition_count_agreement.py",  # three comments, all past tense
-    "DECISIONS.md",                    # closed archive, per CLAUDE.md
-    "SKILL.md",                        # records that README.md is gone
-    "bench-coder.md",                  # records when README.md was deleted
 )
 
 #: Every name above is reachable, so every entry does work. Nothing here names

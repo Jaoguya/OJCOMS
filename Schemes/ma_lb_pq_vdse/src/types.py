@@ -199,7 +199,7 @@ class PrimitiveSuite(Record):
 
     Phase I Step 1 fixes P = {H, SHA-256, AES-256-GCM, HKDF, ML-KEM}. This
     record does not implement any of them — they come from ``Common/crypto``
-    (SystemConfiguration.md: primitives a paper *cites* are shared). It records WHICH
+    (skill.md: primitives a paper *cites* are shared). It records WHICH
     instantiation was resolved, so the choice lands in ``run_meta.json`` and a
     reader can tell whether a result came from liboqs ML-KEM or a pure-Python
     fallback, or from a Type-I curve substituted for the published Type-III.

@@ -1,8 +1,8 @@
-"""``Ledger`` backed by Hyperledger Fabric v2.5 — the adapter SystemConfiguration.md assumed.
+"""``Ledger`` backed by Hyperledger Fabric v2.5 — the adapter the manuscript (SVI) assumed.
 
 Why this exists
 ---------------
-SystemConfiguration.md says the ledger is Hyperledger Fabric v2.5 and global.yaml puts "chain
+the manuscript (SVI) says the ledger is Hyperledger Fabric v2.5 and global.yaml puts "chain
 consistency" inside Exp. 4's measurement boundary. The harness ran
 ``InProcessLedger``, an in-memory dict, so Exp. 4's chain check cost a hash-table
 lookup instead of a network round trip and ``provenance.reportability()`` refused

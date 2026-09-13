@@ -209,7 +209,7 @@ class AuthorityTopology:
 
 @dataclass(frozen=True)
 class Topology:
-    """Fog-cloud topology — SystemConfiguration.md."""
+    """Fog-cloud topology — global.yaml."""
 
     fog_search_nodes: int
     cloud_servers: int

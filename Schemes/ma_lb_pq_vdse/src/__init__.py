@@ -2,7 +2,7 @@
 
 Implements the eight protocol phases of the manuscript
 (``Overleaf/MA-LB-PQ-VDSE.tex``). Module-to-phase mapping is in
-``SystemConfiguration.md``; the Phase I-II build order and its verification criteria are
+``skill.md``; the Phase I-II build order and its verification criteria are
 in ``../PHASE_I_II_PLAN.md``.
 
 Scope boundary: primitives the paper *cites* — SHA-256, HMAC,

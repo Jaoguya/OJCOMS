@@ -5,7 +5,7 @@ Each declares its sweep variable, its primary and secondary metrics, an **untime
 ``measure`` touches is what the reported number covers, and each class's docstring
 quotes the rule it implements.
 
-The boundaries, from ``SystemConfiguration.md`` section 5:
+The boundaries, from ``skill.md``:
 
 * Exp. 1 — online trapdoor generation only; ML-KEM encapsulation excluded.
 * Exp. 2 — AIM check → AASS selection → shard search → response assembly; index
@@ -185,7 +185,7 @@ class CorpusRecordSource:
     the corpus at all. For ``d > 4`` the corpus simply has no such partition,
     and inventing one by re-bucketing ``rid`` would silently replace real
     institutional boundaries with a synthetic split *while still reporting
-    ``corpus_type: synthea``* — the exact class of misrepresentation SystemConfiguration.md
+    ``corpus_type: synthea``* — the exact class of misrepresentation skill.md
     forbids. So it raises instead, naming the decision.
     """
 
@@ -261,7 +261,7 @@ class CorpusRecordSource:
                 f"requested. Splitting it further would replace real "
                 f"institutional boundaries with a synthetic partition while "
                 f"still reporting corpus_type={self.corpus_type!r}, which "
-                f"SystemConfiguration.md forbids. This needs a recorded benchmark decision: "
+                f"skill.md forbids. This needs a recorded benchmark decision: "
                 f"either cap Exp. 3 at d<={self._available_domains}, or "
                 f"regenerate the corpus with more domains and re-freeze "
                 f"(results-affecting), or state in §VI that d>"
@@ -1505,7 +1505,7 @@ class SchedulerAblation:
     specific Exp. 7 throughput. The per-point cross-variant comparison the
     figures show is unaffected.
 
-    **Not reportable, for two reasons beyond the λ sweep.** SystemConfiguration.md requires each
+    **Not reportable, for two reasons beyond the λ sweep.** skill.md requires each
     FSN to be an independent process; this replays in one interpreter, so a
     concurrency figure would not measure the stated topology. Both reasons are
     recorded in ``run_meta.json``.
@@ -1516,7 +1516,7 @@ class SchedulerAblation:
     variant: str = aass_mod.VARIANT_AASS
 
     #: Set False only to compare against the legacy single-interpreter path.
-    #: SystemConfiguration.md requires independent FSN processes and
+    #: skill.md requires independent FSN processes and
     #: provenance.reportability() blocks a concurrency result without them.
     independent_processes: bool = True
 
@@ -1535,7 +1535,7 @@ class SchedulerAblation:
     def _replay_multiprocess(
         self, deployment: Deployment, requests, concurrency: int
     ) -> _WorkloadOutcome:
-        """Each FSN in its own OS process, as SystemConfiguration.md requires.
+        """Each FSN in its own OS process, as skill.md requires.
 
         The scheduler still chooses the node in the parent — that decision IS
         the thing Exp. 7-8 ablate. What changes is that the chosen node then
@@ -1714,7 +1714,7 @@ class SchedulerAblation:
         term of the previous manuscript revision. ``eq:search-cost`` has four
         and the code was aligned to it on 2026-09-07.)
 
-        **Benchmark choice, not published.** Neither §VI nor SystemConfiguration.md fixes how many
+        **Benchmark choice, not published.** Neither §VI nor skill.md fixes how many
         domains one query spans; §VI fixes only d=4. Uniform over subset sizes
         1..d with the starting domain rotated is the neutral choice — it spans
         the range from single-domain queries (where authorization locality

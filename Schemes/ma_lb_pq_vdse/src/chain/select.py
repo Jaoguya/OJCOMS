@@ -1,4 +1,4 @@
-"""Which ledger a run uses, and whether that ledger is the one SystemConfiguration.md names.
+"""Which ledger a run uses, and whether that ledger is the one the manuscript (SVI) names.
 
 One switch, read in one place, so the harness cannot end up running against
 InProcessLedger while provenance stamps the run as Fabric-backed. That pairing
@@ -42,7 +42,7 @@ def make_ledger(**kwargs):
 def ledger_is_faithful() -> bool:
     """What provenance.reportability()'s ``ledger_faithful`` must be told.
 
-    SystemConfiguration.md specifies Hyperledger Fabric v2.5, so only the Fabric backend is
+    the manuscript (SVI) specifies Hyperledger Fabric v2.5, so only the Fabric backend is
     faithful to it. Exp. 4 is gated on this because global.yaml puts chain
     consistency inside its measurement boundary.
     """

@@ -24,7 +24,7 @@ revocation costs a full O(n) rebuild, and Phase VII reads the root once per
 update. Measured on the pinned host, ``delta`` revocations cost **O(n^2.02)** —
 0.8 s at ``delta = 1,000``, 53 s at 8,000, extrapolating to ~8,700 s per run at
 the published ``delta = 10^5``, or ~84 h across 35 runs. The 2026-08-28 campaign
-was killed with zero Exp. 6 points because of it (SystemConfiguration.md item 10).
+was killed with zero Exp. 6 points because of it (skill.md item 10).
 
 It now uses :class:`Common.crypto.merkle.SetMerkleTrie`, a canonical binary
 radix Merkle trie keyed by the leaf digest. The shape depends on the key set

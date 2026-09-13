@@ -101,7 +101,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 from .. import config as scheme_config  # noqa: E402
 from ..fsn.fsn import FogSearchNode  # noqa: E402
 
-#: The four ablation variants of ``SystemConfiguration.md`` section 5.
+#: The four ablation variants of ``skill.md``.
 VARIANT_NO_LB = "no_lb"
 VARIANT_ROUND_ROBIN = "round_robin"
 VARIANT_LEAST_LOADED = "least_loaded"

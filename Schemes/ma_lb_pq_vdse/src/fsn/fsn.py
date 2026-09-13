@@ -28,7 +28,7 @@ sources that could drift — and a scheduler costing queries against a stale
 :class:`~..index.dsi.DynamicSearchIndex` directly and ``entry_count`` reads
 through to it, so there is exactly one count.
 
-**No shared state between nodes.** SystemConfiguration.md requires each FSN to be an
+**No shared state between nodes.** global.yaml requires each FSN to be an
 independent process. Phases I-VI run them in one process, so nothing here holds a
 reference to another node, to the AIM, or to the ledger: the AIM pushes
 authorization state in (:meth:`FogSearchNode.apply_meta`), Phase V Step 4 pushes

@@ -1,13 +1,13 @@
 """CLI entry point for the MA-LB-PQ-VDSE experiment harness.
 
-Documented in ``SystemConfiguration.md`` section 7::
+Documented in ``skill.md``::
 
     python3 -m Schemes.ma_lb_pq_vdse.src.main --experiment all \
         --config "Experiment Configuration/global.yaml" \
         --dataset Dataset/derived --runs 10
 
 Writes ``raw_runs.csv``, ``results.csv`` and ``run_meta.json`` into each
-experiment's folder, per ``SystemConfiguration.md`` section 7.
+experiment's folder, per ``skill.md``.
 
 **Nothing this produces is reportable today**, and the reasons travel with the
 output rather than living only here: ``run_meta.json`` carries
@@ -231,7 +231,7 @@ def run(argv: Optional[Sequence[str]] = None) -> int:
         group_faithful = False
         log(f"pairing: no faithful Type-III backend ({type(exc).__name__}: {exc})")
 
-    # Evidence for the SystemConfiguration.md topology gate. Independent FSN processes need
+    # Evidence for the skill.md topology gate. Independent FSN processes need
     # fork (fsn/pool.py); on a platform without it the harness falls back to the
     # single-interpreter path, and reporting a process count here would assert a
     # topology the run did not use.

@@ -236,9 +236,22 @@ producing points measured under two configurations.
 The corpus is **frozen**. `Dataset/derived/corpus.jsonl` is git-ignored (it is
 hundreds of MB) but pinned by SHA-256 in `dataset.yaml` and verified on load.
 
-Current pin: `corpus_type: synthea`, `e56ca2d1...`, **1,143,792 records**,
-2,023 distinct keywords, 36.3M keyword–document pairs, mean 31.7 keywords per
-record, 10 domains balanced to within one record of equal.
+Current pin, restating `Dataset/dataset_manifest.json` exactly — these are the
+numbers `test_operator_guide_agrees_with_the_corpus_manifest` checks this file
+against, so a re-freeze that does not update them here fails the suite:
+
+| | |
+|---|---|
+| `corpus_type` | `synthea` |
+| SHA-256 | `e56ca2d1`…`f707d6a0` |
+| Records | **1,143,792** |
+| Keyword universe | 2,023 |
+| Keyword–document pairs | 36,263,865 |
+| Domains | 10 |
+| Smallest / largest domain | 114,379 / 114,380 |
+
+Mean 31.7 keywords per record; domains balanced to within one record of equal.
+Measurement is **10 measured runs** per point with 5 discarded warm-ups.
 
 Record schema, one JSON object per line:
 
