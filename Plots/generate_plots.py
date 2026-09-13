@@ -108,6 +108,23 @@ class PanelSpec:
     #: grey so it reads as the reference line it is, never as a fifth scheme.
     companion_metric: Optional[int] = None
     companion_label: str = ""
+    #: Draw a WITHIN-SCHEME parameter sweep assembled from several arm folders.
+    #:
+    #: Exp. 1 needs it. The proposed scheme measures four authorization scopes
+    #: in `exp1_trapdoor_generation__pu<N>/`, each a full sweep over `q`. Those
+    #: four curves used to be drawn on the cross-scheme figure alongside four
+    #: baselines -- eight series in an IEEE single column, and worse than
+    #: cluttered: four of them were one scheme at four scopes and four were
+    #: four different schemes, so the reader could not tell which spread meant
+    #: "scheme A vs scheme B" and which meant "the same scheme paying more".
+    #: A within-scheme parameter does not belong on a between-scheme axis.
+    #:
+    #: This panel takes ONE point from each arm -- the value at `scope_at_x` --
+    #: and plots it against the arm's own parameter, giving `|P_U|` its own
+    #: axis. `scope_arms` maps folder suffix to that numeric parameter.
+    scope_arms: Tuple[Tuple[str, float], ...] = ()
+    scope_at_x: Optional[float] = None
+    scope_scheme: str = ""
 
 
 @dataclass(frozen=True)
@@ -187,18 +204,47 @@ PSA_EXP1_VARIANTS: Tuple[Tuple[str, str], ...] = (
 
 
 EXPERIMENTS: Tuple[ExperimentSpec, ...] = (
-    # §VI Exp. 1 sweeps q AND |P_U| and compares against four baselines, all in
-    # ONE figure: "Increasing q enlarges the keyword dimension of the query,
-    # while increasing |P_U| expands the number of policy states under which
-    # those keywords must be encoded." So the proposed scheme contributes FOUR
-    # curves (one per scope, from exp1_trapdoor_generation__pu<N>/) and each
-    # baseline one (from its own exp1_trapdoor_generation/). See collect_mixed.
+    # TWO PANELS, because SVI Exp. 1 asks two questions that do not share an
+    # axis. (a) is the between-scheme comparison over q; (b) is the
+    # within-scheme cost of widening the authorization scope.
+    #
+    # Both used to be panel (a): the proposed scheme drew one curve per |P_U|
+    # from exp1_trapdoor_generation__pu<N>/ alongside four baselines. Eight
+    # series in an IEEE single column, and worse than cluttered -- four of them
+    # were ONE scheme at four scopes and four were four different schemes, so a
+    # reader could not tell which spread meant "scheme A vs scheme B" and which
+    # meant "the same scheme paying more". A within-scheme parameter does not
+    # belong on a between-scheme axis.
+    #
+    # Panel (b) is also where the |P_U| half of tab:cost's O(|T_Q|)T_H row
+    # becomes checkable: |T_Q| = q|P_U|, so at fixed q the latency must be
+    # linear in |P_U|. Measured 0.0349 / 0.0655 / 0.1288 / 0.2606 ms at q=5 --
+    # ratios 1.88, 1.97, 2.02. Nothing is re-run; all four arms were already
+    # measured and stay on disk.
     ExperimentSpec(1, "exp1_trapdoor_generation", "fig_exp1_trapdoor.pdf",
                    "Queried keywords $q$", "Token generation latency (ms)",
                    log_y=True,   # 4.82 decades — see LOG_Y_DECADES
                    proposed_prefix="",
                    proposed_variants=PSA_EXP1_VARIANTS,
-                   restrict_x=(1, 5, 10, 15, 20)),
+                   restrict_x=(1, 5, 10, 15, 20),
+                   panels=(
+                       PanelSpec(0, "Token generation\nlatency (ms)", "a"),
+                       PanelSpec(0, "Token generation\nlatency (ms)", "b",
+                                 scope_arms=(("pu1", 1), ("pu2", 2),
+                                             ("pu4", 4), ("pu8", 8)),
+                                 scope_at_x=5,
+                                 scope_scheme="Proposed",
+                                 xlabel=r"Authorized policies $|\mathcal{P}_U|$ (at $q=5$)",
+                                 # LOG-LOG. |P_U| is sampled geometrically
+                                 # (1,2,4,8) and |T_Q| = q|P_U| is LINEAR in
+                                 # it, so only log-log renders that as a
+                                 # straight line -- on a linear x the four
+                                 # points bunch at the left and the linear law
+                                 # reads as a curve, which is the opposite of
+                                 # what the panel exists to show.
+                                 log_x=True,
+                                 log_y=True),
+                   )),
     ExperimentSpec(2, "exp2_search_latency", "fig_exp2_search.pdf",
                    "Index size $N$ (records)", "Search latency (ms)",
                    log_x=True, log_y=True,
@@ -796,6 +842,51 @@ def collect_ablation(input_root: Path, spec: ExperimentSpec) -> List[Series]:
     return found
 
 
+def collect_scope_sweep(
+    input_root: Path, base_folder: str, panel: "PanelSpec"
+) -> List[Series]:
+    """One series: the metric at a fixed x, across several arm folders.
+
+    Reads `<scheme>/<base_folder>__<suffix>/results.csv` for every
+    `(suffix, parameter)` in `panel.scope_arms`, takes the row whose
+    `variable_value` equals `panel.scope_at_x`, and plots it against
+    `parameter`. That turns a within-scheme knob into its own axis instead of
+    N extra curves on a between-scheme figure.
+
+    A missing arm or a missing x is dropped rather than raised on: the panel
+    then draws the arms that exist, and the caller warns. Silently plotting a
+    short curve as if it were complete is the failure this avoids.
+    """
+    out = Series(scheme=panel.scope_scheme or "Proposed")
+    scheme_dir = input_root / PROPOSED_SCHEME
+    for suffix, parameter in panel.scope_arms:
+        results = scheme_dir / f"{base_folder}__{suffix}" / "results.csv"
+        if not results.is_file():
+            continue
+        try:
+            rows = list(csv.DictReader(results.open(newline="", encoding="utf-8")))
+        except OSError:
+            continue
+        for row in rows:
+            try:
+                if float(row["variable_value"]) != float(panel.scope_at_x):
+                    continue
+                out.x.append(float(parameter))
+                out.y.append(float(row["primary_mean"]))
+                out.yerr.append(float(row.get("primary_ci95") or 0.0))
+                out.n_runs.append(int(float(row.get("n_runs") or 0)))
+            except (KeyError, TypeError, ValueError):
+                continue
+            break
+    meta = scheme_dir / f"{base_folder}__{panel.scope_arms[0][0]}" / "run_meta.json"
+    if meta.is_file():
+        try:
+            out.reportable = json.loads(meta.read_text()).get("reportable")
+        except (OSError, json.JSONDecodeError):
+            pass
+    return [out] if out.x else []
+
+
 def collect_folder(input_root: Path, folder: str) -> List[Series]:
     """Every scheme's results for one experiment FOLDER, by name.
 
@@ -1247,7 +1338,9 @@ def render(spec: ExperimentSpec, series_list: Sequence[Series],
         # the panels cannot share an x-axis: Exp. 4's (a) is `r` returned
         # ciphertexts and (b) is `t` tampered ones. Sharing would silently
         # relabel one of them.
-        cross = any(panel.folder for panel in spec.panels)
+        # A scope panel's x is |P_U|, not the figure's q, so it cannot
+        # share an x-axis either.
+        cross = any(panel.folder or panel.scope_arms for panel in spec.panels)
         # Stacked, not side by side: three panels across an IEEE single column
         # would be 1.16in each, too narrow for an axis label. Height is per
         # panel; width is whatever the column (and --scale) already set.
@@ -1258,7 +1351,29 @@ def render(spec: ExperimentSpec, series_list: Sequence[Series],
         )
         for i, (ax, panel) in enumerate(zip(axes, spec.panels)):
             panel_series = series_list
-            if panel.folder:
+            if panel.scope_arms:
+                if input_root is None:
+                    warnings.append(
+                        f"exp{spec.number}: panel ({panel.tag}) is a scope "
+                        f"sweep but no input root was given; skipped"
+                    )
+                    continue
+                panel_series = collect_scope_sweep(input_root, spec.folder, panel)
+                if not panel_series:
+                    warnings.append(
+                        f"exp{spec.number}: panel ({panel.tag}) found none of "
+                        f"the arms {[a for a, _ in panel.scope_arms]} under "
+                        f"{spec.folder}__*; the figure is incomplete"
+                    )
+                    continue
+                drawn = len(panel_series[0].x)
+                if drawn != len(panel.scope_arms):
+                    warnings.append(
+                        f"exp{spec.number}: panel ({panel.tag}) drew {drawn} of "
+                        f"{len(panel.scope_arms)} arms at x={panel.scope_at_x}; "
+                        f"a short curve would read as a complete one"
+                    )
+            elif panel.folder:
                 if input_root is None:
                     warnings.append(
                         f"exp{spec.number}: panel ({panel.tag}) reads "
@@ -1292,6 +1407,9 @@ def render(spec: ExperimentSpec, series_list: Sequence[Series],
                 # companion panel adds a reference curve of its own -- Exp. 3
                 # panel (b)'s flat line at 1 is Option D's trapdoor count, and
                 # unlabelled it is just an unexplained rule across the figure.
+                # A scope panel draws ONE series in the proposed
+                # scheme's own style, already named in panel (a); a
+                # one-entry legend would just repeat it.
                 add_legend=(i == 0 or bool(panel.folder)
                             or panel.companion_metric is not None),
                 # Warnings once, or each series would report itself per panel.

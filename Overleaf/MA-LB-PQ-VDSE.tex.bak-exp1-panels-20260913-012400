@@ -2250,11 +2250,8 @@ O(|\mathcal{T}_Q|)T_H
 \begin{figure}[!t]
     \centering
     \includegraphics[width=\columnwidth]{images/fig_exp1_trapdoor.pdf}
-    \caption{Policy-state-aware token-generation latency:
-    (a) against the number of queried keywords $q$, compared with the four
-    baselines, and (b) against the authorization scope
-    $|\mathcal{P}_U|$ at $q=5$ for the proposed framework, whose
-    log--log linearity matches $|\mathcal{T}_Q|=q|\mathcal{P}_U|$.}
+    \caption{Policy-state-aware token-generation latency under increasing
+    query and authorization scopes.}
     \label{fig:exp1}
 \end{figure}
 
