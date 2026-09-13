@@ -30,14 +30,14 @@ Alongside any number, always state **reportable or not** (corpus type, host,
 
 ## The rerun boundary — set 2026-09-12
 
-The manuscript was rewritten and the proposed scheme rebuilt against it. What
-that costs, per experiment:
+The manuscript was rewritten and the proposed scheme rebuilt against it. **That
+campaign completed on 2026-09-13.** What it covered, per experiment:
 
 | Exp. | Baselines | Proposed | Why |
 |---|---|---|---|
-| **2, 3** | **FROZEN — do not re-run, do not touch the code that produces them** | re-run | the baseline numbers are good and are the expensive ones |
-| 1, 4, 5 | re-run | re-run | the construction and Exp. 1's second sweep dimension changed; Exp. 4 now has two arms |
-| 6, 7, 8 | n/a | re-run | proposed-scheme ablations |
+| **2, 3** | **FROZEN — do not re-run, do not touch the code that produces them** | 3 done; **2 killed** | the baseline numbers are good and are the expensive ones |
+| 1, 4, 5 | done | done | the construction and Exp. 1's second sweep dimension changed; Exp. 4 now has two arms |
+| 6, 7, 8 | n/a | done | proposed-scheme ablations |
 | ~~9~~ | — | — | **folded into Exp. 4 on 2026-09-12**; Section VI has no Experiment 9 |
 
 **Exp. 2 and Exp. 3 baseline results are frozen.** Their `results.csv` files
@@ -46,9 +46,18 @@ search path, index construction, workload selection or aggregation — needs my
 say-so first. Renaming a flag or fixing a comment cannot move a number and does
 not need asking.
 
-The proposed scheme has **no reportable result at all** right now: its rebuild
-is only measured on a development corpus. Nothing about it is quotable until it
-runs on the campaign host.
+**The proposed scheme now has reportable results for every experiment it
+runs** — measured on the campaign host at `sharding.replication: 2`, n = 10,
+`corpus_type: synthea`: Exps. 1, 3, 4(a), 5, 6, 7, 8. Two carve-outs:
+
+- **Exp. 2 was killed** on 2026-09-13; the proposed scheme has none.
+- **Exp. 4's `granularity` arm is not reportable**, deliberately — it ran on
+  the in-process ledger because `tab:cost` prices verification at `O(r)T_BC`
+  and at `r = 20,000` that is ~3M chain reads (~36 h) against a real peer.
+  Panel (a), where latency IS the measurement, ran against Hyperledger Fabric
+  v2.5 and is reportable.
+
+`skill.md`'s inventory is the per-directory detail.
 
 ## Fixing things
 

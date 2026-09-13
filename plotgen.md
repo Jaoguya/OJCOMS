@@ -151,13 +151,35 @@ Series are labelled by citation number, never by author name:
 - Legend order is kept separate from style assignment, so reordering the legend
   can never reassign a scheme's marker or colour.
 
-**Experiment 1 is the one mixed figure.** §VI sweeps `q` *and* the authorization
-scope, so the proposed scheme contributes four curves — one per `|P_U|`, read
-from `exp1_trapdoor_generation__pu<N>/` — while each baseline contributes one
-from its own `exp1_trapdoor_generation/`. The figure also restricts x to
-`{1, 5, 10, 15, 20}`: the baselines were measured at every integer 1–20, and
-drawing four 20-point curves against a 5-point one would misrepresent the
-comparison. Nothing measured is discarded from any file, only from the plot.
+**Experiment 1 is two panels, and that is deliberate.** §VI sweeps `q` *and*
+the authorization scope, which are two different questions:
+
+| Panel | x | Series |
+|---|---|---|
+| (a) | `q` | five schemes, one curve each — the between-scheme comparison |
+| (b) | `\|P_U\|` at `q = 5` | the proposed scheme alone, four points, **log–log** |
+
+Both used to be panel (a): the proposed scheme drew a curve per `|P_U|` from
+`exp1_trapdoor_generation__pu<N>/` alongside four baselines. Eight series in an
+IEEE single column, and worse than cluttered — four of them were *one* scheme
+at four scopes and four were *four* schemes, so a reader could not tell which
+spread meant "scheme A vs scheme B" and which meant "the same scheme paying
+more". **A within-scheme parameter does not belong on a between-scheme axis.**
+
+Panel (b) is drawn log–log because `|P_U|` is sampled geometrically (1,2,4,8)
+and `|T_Q| = q·|P_U|` is *linear* in it, so only log–log renders that as the
+straight line it is. It is also the only place `tab:cost`'s `O(|T_Q|)T_H` row
+is checked against data now that `test_cost_table_agreement.py` has the arms it
+needs but the figure no longer overlays them.
+
+`PanelSpec.scope_arms` / `scope_at_x` build it: one point per arm folder at a
+fixed x, plotted against the arm's own parameter. A missing arm draws short and
+warns rather than passing an incomplete curve off as complete.
+
+The figure also restricts x to `{1, 5, 10, 15, 20}`: the baselines were
+measured at every integer 1–20, and §VI's figure shows five points. Nothing
+measured is discarded from any file, only from the plot — all four `pu`
+directories stay on disk with their `results.csv` intact.
 
 ---
 

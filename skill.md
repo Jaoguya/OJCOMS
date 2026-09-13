@@ -163,8 +163,8 @@ Primary metric first, then that scheme's secondaries as they appear in its
 | 2 | latency (ms)† | `n_eff`, `entries_traversed` | `n_eff`, `entries_traversed`, `prune_ratio` | `n_eff`, `entries_traversed`, `prune_ratio` | `n_eff`, `tree_descents`, `prune_ratio` | `wall_clock_ms`, `pairings_computed` |
 | 3 | latency (ms) | `trapdoors_issued`, `nodes_searched` | `trapdoors_issued`, `cross_node_msgs`, `results_returned` | `trapdoors_issued`, `cross_node_messages` | `trapdoors_issued`, `cross_node_msgs`, `results_returned` | `trapdoors_issued`, `cross_node_messages` |
 | 4 | latency (ms) | `proof_size` (KB), `path_length` | `proof_size_kb`, `entries_combined`, `accepted` | `proof_size_kb`, `proof_elements` | `proof_size_kb`, `path_length` | — |
-| 5 | latency (ms) | `merkle_nodes_recomputed`, `entries_rewritten` | `entries_rewritten`, `index_growth_bytes`, `delete_ms` | `entries_rewritten`, `index_entries_before` | — | — |
-| 6 | latency (ms) | `dias_message_size` (KB), `fsns_touched`, `delivered_kb` | — | — | — | — |
+| 5 | latency (ms) | `entries_retokenized`, `merkle_nodes_recomputed`, `commitments_rebuilt`, `replica_writes` | `entries_rewritten`, `index_growth_bytes`, `delete_ms` | `entries_rewritten`, `index_entries_before` | — | — |
+| 6 | latency (ms) | `records_evolved`, `entries_retokenized`, `delivered_kb` (KB), `fsns_touched` | — | — | — | — |
 | 7 | throughput (q/s) | `latency_p95`, `rejected` | — | — | — | — |
 | 8 | utilization std. dev. | `max_node_utilization`, `cross_node_forwards`, `max_queue_depth` | — | — | — | — |
 
@@ -174,6 +174,23 @@ projected and CPU time is invariant in the worker count.
 
 **Exp. 8's secondary order is the panel order.** `generate_plots.py` indexes
 panels positionally; reordering that list silently relabels a panel.
+
+Two Exp. 5/6 metrics changed on 2026-09-13 and mean specific things:
+
+- **`replica_writes` is PHYSICAL, `entries_retokenized` is LOGICAL.** `T'` is
+  recomputed once per affected entry — the token does not depend on which node
+  stores it — but the entry is written to every node holding that shard, or the
+  replicas diverge and a query AASS routes to the stale one returns stale
+  results. At `replication: 2` they differ by exactly 2x (204 vs 102 at
+  `k = 100`), and the physical count is the one comparable with Scheme 30/35's
+  `entries_rewritten`, which comes from `dias.synchronize()` and hits every
+  holder.
+- **`records_evolved` was called `policies_evolved` and counted the wrong
+  noun.** It increments once per RECORD. While Exp. 6 synthesised one record
+  per policy the two were indistinguishable — both read 40 — so the mislabel
+  was invisible; on real corpus records they differ by the records-per-policy
+  factor (811 vs 4 at ratio 0.1) and a reader would have taken 811 as a policy
+  count.
 
 ### One construction
 
@@ -364,9 +381,29 @@ destroyed completed results.
 ./infra/fleet.sh status        # what is running, what is busy, burn rate
 ./infra/fleet.sh start         # start all, authorise your IP, wait for sshd
 ./infra/fleet.sh deploy        # archive results, update code, restore results
+./infra/fleet.sh run <ip> <tag> <cmd...>   # dispatch ONE job, pin BLAS, self-stop
+./infra/fleet.sh reap <ip>...  # queue a self-stop onto an already-running job
 ./infra/fleet.sh harvest ./out # pull results, selected by provenance
 ./infra/fleet.sh stop          # STOP, not terminate
 ```
+
+**Use `run` rather than hand-rolled ssh.** It sets the five BLAS variables
+`global.yaml` requires — a miss makes latency depend on core count, silently —
+and halts the node the moment the job exits, which is the "stop an idle
+instance" rule enforced instead of remembered. `--keep` suppresses the
+self-stop when you intend to chain more work onto the same node. `reap` does
+the same for a job someone already started another way.
+
+A plain `python3` in the command resolves to the campaign venv: `run` puts
+`~/.venv-malbpq/bin` first on PATH. Without that it hits system python and dies
+on `ModuleNotFoundError: mmh3` before measuring anything — and since the
+command exits, the node self-stops in seconds and a failed run looks exactly
+like a fast one.
+
+There is also a CloudWatch alarm per instance (`OJCOMS-autostop-<id>`) that
+stops a node whose CPU stays under 1% for **2 hours**. It is a backstop for a
+wedged or killed process, not the primary mechanism — it was 30 minutes until
+2026-09-13, which is short enough to reap a node mid-`docker pull`, and it did.
 
 `OJCOMS_BRANCH` picks the branch (default `main`); `OJCOMS_KEY` and `OJCOMS_SG`
 override key and security group.
@@ -451,18 +488,28 @@ engineering artefact — it is simply not paper material.
 ### What has to be re-run, and what does not
 
 The manuscript was rewritten and the proposed scheme rebuilt against it
-(2026-09-12). That does not invalidate everything.
+(2026-09-12). **That campaign ran to completion on 2026-09-13** — the table
+below is what it covered, kept as the record of what was and was not re-run.
 
 | Exp. | Baselines | Proposed | Status |
 |---|---|---|---|
-| **2** | **frozen — keep** | re-run | baseline numbers are good, and are the expensive ones |
-| **3** | **frozen — keep** | re-run | as above |
-| 1 | re-run | re-run | Exp. 1 gained its second sweep dimension |
-| 4 | re-run | re-run | construction changed |
-| 5 | re-run | re-run | construction changed |
-| 6 | n/a | re-run | variable changed to the affected-policy ratio |
-| 7, 8 | n/a | re-run | proposed-scheme ablations |
+| **2** | **frozen — keep** | **killed** | user's instruction 2026-09-13; the proposed scheme has no Exp. 2 |
+| **3** | **frozen — keep** | done | baseline numbers are good, and are the expensive ones |
+| 1 | done | done | Exp. 1 gained its second sweep dimension |
+| 4 | done | done (a) reportable, (b) memory ledger | construction changed |
+| 5 | done | done | construction changed |
+| 6 | n/a | done | variable changed to the affected-policy ratio |
+| 7, 8 | n/a | done | proposed-scheme ablations |
 | ~~9~~ | — | — | folded into Exp. 4; Section VI never defined it |
+
+**`sharding.replication` went 1 → 2 on 2026-09-13, and it is
+results-affecting.** At 1 the eligible set for any shard is a singleton, so
+Algorithm 1's `S ∉ S_j` guard pinned AASS to the sole holder and it could not
+balance load at all — Exp. 8 then ranked the arms by how evenly they spread
+work while ignoring whether the chosen node could serve the shard. Every
+proposed-scheme result was re-measured at 2. Anything measured at replication
+1 is not comparable with anything measured at 2; `index.yaml`'s hash is in
+every `run_meta.json`.
 
 **Exp. 2 and Exp. 3 baseline results are frozen.** Their `results.csv` files
 stay exactly as they are, and a change that could move them — a baseline's
@@ -483,24 +530,38 @@ disclosure; `plotgen.md`'s pre-publication checklist records it as the one
 permitted exception, and Exps. 1, 4, 4b and 5 were re-run at the current
 revision so that every other figure stays warning-free.
 
-Current inventory — one directory per experiment, `n = 10` at every point:
+Current inventory — **38 directories, 37 reportable**, `n = 10` at every
+measured point. Campaign completed 2026-09-13.
 
 | Scheme | Directories | Reportable |
 |---|---|---|
+| `ma_lb_pq_vdse` | exp1, exp3, exp4(+granularity), exp5, exp6×3, exp7×4, exp8×4 | 18 of 19 |
 | `yue_ge` | exp1, **exp2**, **exp3**, exp4(+granularity), exp5 | all 6 |
 | `guo_vdsse` | exp1, **exp2**, **exp3**, exp4(+granularity), exp5 | all 6 |
-| `perera_lv_pqabse` | ~~exp1~~, **exp2**, **exp3**, ~~exp4~~ | 2 of 4 |
+| `perera_lv_pqabse` | exp1, **exp2**, **exp3**, exp4 | all 4 |
 | `thingom_pq_abse` | exp1, **exp2**, **exp3** | all 3 |
-| `ma_lb_pq_vdse` | none | **none** |
 
-Bold is frozen. Struck-through is **superseded**: Scheme 54's `trapdoor()` did
-not bind to the user's attribute secret key and signed with the wrong key
-(Ref[54] L563-566, L798, L816). Fixed 2026-09-12; Exp. 1 and Exp. 4 are the only
-experiments that call it on a measured path, and both directories carry a
-`SUPERSEDED` marker explaining why. See [54.md](54.md). The proposed scheme has **no reportable result**: its
-implementation was ported on 2026-09-12 and has only been exercised against a
-development corpus, which the gate refuses by design. Nothing about it is
-quotable until it runs on the campaign host.
+Bold is frozen. Two entries need reading carefully:
+
+- **The proposed scheme has no Exp. 2.** Killed on the user's instruction
+  2026-09-13. Its own Exp. 2 also could not reach the top two sweep points:
+  at `domains: 4` the corpus yields 457,518 records, so `N = 5·10⁵` and `10⁶`
+  recorded `status=failed` — by design, see *Exp. 2 refuses a point the corpus
+  cannot support* in [OJCOMS.md](OJCOMS.md).
+- **`exp4_..._granularity` is the one non-reportable directory**, deliberately.
+  Panel (a) ran against real Hyperledger Fabric v2.5 and is reportable; panel
+  (b) pins `r = 20,000`, and `tab:cost` prices verification at `O(r)T_BC`, so
+  against a real peer that is ~3M chain reads and about 36 h. It was measured
+  on the in-process ledger instead. The plotted quantity is
+  `records_discarded`, a COUNT identical under either backend; only its
+  latency secondary is understated, and `run_meta.json` records exactly that
+  as the reason. Batching the anchor fetch would not change this: `O(r)` reads
+  is the published cost, not an implementation defect.
+
+Scheme 54's Exp. 1 and Exp. 4 are **no longer superseded**. Its `trapdoor()`
+did not bind to the user's attribute secret key and signed with the wrong key
+(Ref[54] L563-566, L798, L816); fixed 2026-09-12, both re-run 2026-09-13, and
+the `SUPERSEDED` markers removed. See [54.md](54.md).
 
 **56 `__points-` shard directories were deleted on 2026-09-12.** They held
 `n = 30` measurements — the old replication count — while every parent holds
