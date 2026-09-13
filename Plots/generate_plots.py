@@ -204,47 +204,26 @@ PSA_EXP1_VARIANTS: Tuple[Tuple[str, str], ...] = (
 
 
 EXPERIMENTS: Tuple[ExperimentSpec, ...] = (
-    # TWO PANELS, because SVI Exp. 1 asks two questions that do not share an
-    # axis. (a) is the between-scheme comparison over q; (b) is the
-    # within-scheme cost of widening the authorization scope.
+    # ONE CURVE PER SCHEME, one panel. Exp. 1 sweeps q and compares five
+    # schemes; that is the whole figure.
     #
-    # Both used to be panel (a): the proposed scheme drew one curve per |P_U|
-    # from exp1_trapdoor_generation__pu<N>/ alongside four baselines. Eight
-    # series in an IEEE single column, and worse than cluttered -- four of them
-    # were ONE scheme at four scopes and four were four different schemes, so a
-    # reader could not tell which spread meant "scheme A vs scheme B" and which
-    # meant "the same scheme paying more". A within-scheme parameter does not
-    # belong on a between-scheme axis.
+    # It briefly drew the |P_U| scope sweep as a second panel (b), and before
+    # that as four extra curves on the same axes. Both are gone on the user's
+    # instruction 2026-09-13: Fig. 1 is the between-scheme comparison over q
+    # and nothing else.
     #
-    # Panel (b) is also where the |P_U| half of tab:cost's O(|T_Q|)T_H row
-    # becomes checkable: |T_Q| = q|P_U|, so at fixed q the latency must be
-    # linear in |P_U|. Measured 0.0349 / 0.0655 / 0.1288 / 0.2606 ms at q=5 --
-    # ratios 1.88, 1.97, 2.02. Nothing is re-run; all four arms were already
-    # measured and stay on disk.
+    # NOTHING MEASURED IS DISCARDED. global.yaml still declares
+    # policy_scopes [1,2,4,8], the runner still writes all four
+    # exp1_trapdoor_generation__pu<N>/ directories, and `proposed_variants`
+    # below still selects pu1 as the drawn curve. The other three scopes stay
+    # in their directories with results.csv intact, and PSA_EXP1_VARIANTS
+    # carries the three commented-out entries that restore them.
     ExperimentSpec(1, "exp1_trapdoor_generation", "fig_exp1_trapdoor.pdf",
                    "Queried keywords $q$", "Token generation latency (ms)",
                    log_y=True,   # 4.82 decades — see LOG_Y_DECADES
                    proposed_prefix="",
                    proposed_variants=PSA_EXP1_VARIANTS,
-                   restrict_x=(1, 5, 10, 15, 20),
-                   panels=(
-                       PanelSpec(0, "Token generation\nlatency (ms)", "a"),
-                       PanelSpec(0, "Token generation\nlatency (ms)", "b",
-                                 scope_arms=(("pu1", 1), ("pu2", 2),
-                                             ("pu4", 4), ("pu8", 8)),
-                                 scope_at_x=5,
-                                 scope_scheme="Proposed",
-                                 xlabel=r"Authorized policies $|\mathcal{P}_U|$ (at $q=5$)",
-                                 # LOG-LOG. |P_U| is sampled geometrically
-                                 # (1,2,4,8) and |T_Q| = q|P_U| is LINEAR in
-                                 # it, so only log-log renders that as a
-                                 # straight line -- on a linear x the four
-                                 # points bunch at the left and the linear law
-                                 # reads as a curve, which is the opposite of
-                                 # what the panel exists to show.
-                                 log_x=True,
-                                 log_y=True),
-                   )),
+                   restrict_x=(1, 5, 10, 15, 20)),
     ExperimentSpec(2, "exp2_search_latency", "fig_exp2_search.pdf",
                    "Index size $N$ (records)", "Search latency (ms)",
                    log_x=True, log_y=True,
@@ -253,29 +232,30 @@ EXPERIMENTS: Tuple[ExperimentSpec, ...] = (
                    "Domains $d$", "Cross-domain search latency (ms)",
                    log_y=True,
                    proposed_prefix=""),
-    # TWO PANELS. Exp. 4 asks what verification COSTS and what it BUYS, and the
-    # second question is a different sweep: `r` returned ciphertexts against `t`
-    # tampered ones. Merged 2026-09-05 -- panel (b) was a standalone Exp. 9
-    # figure, but Section VI makes one claim out of the pair (a moderate
-    # per-result cost bought with per-result localization), so splitting them
-    # across two figures asked the reader to join them up.
+    # ONE PANEL: what verification BUYS. Exp. 4 has two arms -- the default
+    # sweeps `r` and measures the per-result cost, the `granularity` arm pins
+    # `r` and sweeps the tamper count `t`. The figure drew both as (a) and (b);
+    # on the user's instruction 2026-09-13 it draws the granularity arm alone.
     #
-    # Panel (a) is T_avg = T_verify / r, which is what Section VI reports.
-    # Panel (b) is records discarded, NOT records retained: retention is 0 for
-    # both baselines and a log axis cannot draw a zero, so the complement is
-    # what stays plottable. It carries the same fact -- discarding exactly `t`
-    # is localizing exactly `t` and retaining the rest.
+    # Kept as a `panels` entry with its own `folder` rather than repointing the
+    # spec at the arm directory. The spec-level folder feeds `collect`, whose
+    # `exp4_*` glob also matches the unsuffixed parent -- and the two sweep
+    # DIFFERENT variables, so a scheme with no arm (Scheme 54, which SVI leaves
+    # out of this panel by design) contributed its `r` curve to a `t` axis. A
+    # panel `folder` reads that directory by name and cannot fall back.
+    #
+    # Records discarded, NOT records retained: retention is 0 for both
+    # baselines and a log axis cannot draw a zero, so the complement is what
+    # stays plottable. It carries the same fact -- discarding exactly `t` is
+    # localizing exactly `t` and retaining the rest.
+    #
+    # The default arm's data is untouched in exp4_verification_overhead/ and
+    # still reportable (it ran against real Fabric); it simply has no figure.
     ExperimentSpec(4, "exp4_verification_overhead", "fig_exp4_verify.pdf",
-                   "Returned results $r$", "Verification latency (ms)",
-                   log_y=True,   # 2.66 decades — see LOG_Y_DECADES
+                   "Tampered records $t$", "Records discarded",
+                   log_y=True,
                    panels=(
-                       PanelSpec(0, "Verification latency\nper result (ms)", "a",
-                                 per_x=True, log_x=True),
-                       # FOLDED 2026-09-12. Panel (b) reads Exp. 4's own
-                       # `granularity` ARM, not a separate experiment: SVI has
-                       # no Experiment 9, it has one Exp. 4 whose figure has two
-                       # panels over two variables.
-                       PanelSpec(0, "Records discarded", "b",
+                       PanelSpec(0, "Records discarded", "",
                                  folder="exp4_verification_overhead__granularity",
                                  xlabel="Tampered records $t$",
                                  log_x=True, log_y=True),
@@ -898,15 +878,26 @@ def collect_folder(input_root: Path, folder: str) -> List[Series]:
     found: List[Series] = []
     if not input_root.is_dir():
         return found
-    number = folder.split("_", 1)[0].replace("exp", "")
+    # BY NAME, which is what the docstring always claimed. This resolved by
+    # NUMBER and then skipped every directory containing "__", so a panel asking
+    # for `exp4_verification_overhead__granularity` was handed
+    # `exp4_verification_overhead` -- the arm's own directory was the one case
+    # the filter excluded. Fig. 4(b) therefore plotted the default arm's
+    # r-sweep verification latency under a "Records discarded" axis against
+    # "Tampered records t", and included Scheme 54, which SVI leaves out of
+    # that panel because it verifies per record already.
+    #
+    # Same defect this file warns about twice elsewhere: drawing one
+    # experiment's numbers under another's axis label. Caught 2026-09-13 only
+    # by looking at the rendered figure -- the CSVs were correct throughout, so
+    # every check that read results.csv passed.
     for scheme_dir in sorted(p for p in input_root.iterdir() if p.is_dir()):
-        for exp_dir in sorted(scheme_dir.glob(f"exp{number}_*")):
-            if not exp_dir.is_dir() or "__" in exp_dir.name:
-                continue
-            series = read_results(exp_dir / "results.csv", scheme_dir.name)
-            if series is not None:
-                found.append(series)
-                break
+        exp_dir = scheme_dir / folder
+        if not exp_dir.is_dir():
+            continue
+        series = read_results(exp_dir / "results.csv", scheme_dir.name)
+        if series is not None:
+            found.append(series)
     return found
 
 
@@ -1345,10 +1336,16 @@ def render(spec: ExperimentSpec, series_list: Sequence[Series],
         # would be 1.16in each, too narrow for an axis label. Height is per
         # panel; width is whatever the column (and --scale) already set.
         w, h = plt.rcParams["figure.figsize"]
+        # squeeze=False: with ONE panel plt.subplots returns a bare Axes, not
+        # an array, and the zip below raises "'Axes' object is not iterable".
+        # A single-panel `panels` spec is legitimate -- Exp. 4 draws only its
+        # granularity arm -- so the shape must not depend on the count.
         fig, axes = plt.subplots(
             len(spec.panels), 1, sharex=not cross,
             figsize=(w, h * 0.78 * len(spec.panels)),
+            squeeze=False,
         )
+        axes = axes[:, 0]
         for i, (ax, panel) in enumerate(zip(axes, spec.panels)):
             panel_series = series_list
             if panel.scope_arms:
@@ -1427,7 +1424,10 @@ def render(spec: ExperimentSpec, series_list: Sequence[Series],
                 companion_metric=panel.companion_metric,
                 companion_label=panel.companion_label,
             )
-            ax.set_title(f"({panel.tag})", loc="left", fontsize=8, pad=2)
+            # An empty tag draws a bare "()" -- a single-panel figure has
+            # nothing to disambiguate, so it carries no (a)/(b) label.
+            if panel.tag:
+                ax.set_title(f"({panel.tag})", loc="left", fontsize=8, pad=2)
         fig.align_ylabels(axes)
         fig.tight_layout(pad=0.3, h_pad=0.6)
     else:
