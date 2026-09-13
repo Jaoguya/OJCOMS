@@ -2219,7 +2219,8 @@ This experiment evaluates the online cost of generating policy-state-aware
 search tokens. The number of queried keywords is varied as
 $q\in\{1,5,10,15,20\}$, while the number of authorized policies is varied
 as $|\mathcal{P}_U|\in\{1,2,4,8\}$. The proposed framework is compared
-with Schemes~\cite{ref30}, \cite{ref35}, \cite{ref41}, and \cite{ref54}.
+with Guo \textit{et al}.~\cite{ref35}, XB-Muse~\cite{ref36}, Thingom
+\textit{et al}.~\cite{ref41}, and Zhuang \textit{et al}.~\cite{ref52}.
 ML-KEM key establishment is excluded because it is performed during
 attribute-key delivery rather than for each search request.
 
@@ -2369,21 +2370,17 @@ retrieval as the number of returned entries $r$ increases from 10 to
 1000. Controlled tampered or stale entries are also injected to evaluate
 whether invalid results can be individually identified without rejecting
 otherwise valid results. We report the average verification latency
-$T_{\rm avg}=T_{\rm verify}/r$ and, as the number of tampered entries $t$
-increases at fixed $r$, the number of records discarded -- from which
-invalid-result localization and valid-result retention follow directly,
-since a scheme that discards exactly $t$ records has localized every
-tampered entry and retained every valid one. The proposed framework is
-compared with Schemes~\cite{ref30}, \cite{ref35}, and \cite{ref54}, which
-provide explicit retrieval-verification mechanisms.
+$T_{\rm avg}=T_{\rm verify}/r$, invalid-result localization rate, and
+valid-result retention. The proposed framework is compared with
+Schemes~\cite{ref30}, \cite{ref35}, and \cite{ref54}, which provide
+explicit retrieval-verification mechanisms.
 
 \begin{figure}[!t]
     \centering
     \includegraphics[width=\columnwidth]{images/fig_exp4_verify.pdf}
     \caption{Fine-grained verification effectiveness:
     (a) average verification latency per returned entry and
-    (b) records discarded as the number of tampered entries $t$ increases,
-    with $r$ held fixed.}
+    (b) invalid-result localization and valid-result retention.}
     \label{fig:exp4}
 \end{figure}
 

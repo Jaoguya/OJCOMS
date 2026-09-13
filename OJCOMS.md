@@ -273,11 +273,18 @@ the prose.
   §VI elsewhere calls the workload a "conjunctive query". The implementation
   follows the equation.
 - **Manuscript-side, unchanged by the rebuild:** the Conclusion still lists
-  "PDSIs" and "IAS" while the body defines DIAS throughout; `tab:cost` uses
-  `T_Mul`, `T_Sig`, `T_BF`, `N`, `n_cand`, none defined in `tab:cost-notation`;
-  `ref34`, `ref44`, `ref49`, `ref56` are never cited; `tab:notation` defines
-  `VID_i`, which the protocol no longer uses, and `Score_j`, where the
-  scheduler's symbol is `SC_j`.
+  "PDSIs" and "IAS" while the body defines DIAS throughout; `ref34`, `ref44`,
+  `ref49`, `ref56` are never cited; `tab:notation` defines `VID_i`, which the
+  protocol no longer uses, `Score_j`, where the scheduler's symbol is `SC_j`,
+  and `ST` and `Root_t`, which appear nowhere in the body — it uses `T_Q` and
+  `Root_i`/`Root_i'`/`Root_U`, the last of which `tab:notation` never defines.
+
+  **Corrected 2026-09-13.** This bullet used to claim `tab:cost` uses
+  `T_Mul`, `T_Sig`, `T_BF`, `N` and `n_cand`, "none defined in
+  `tab:cost-notation`". Verified against the manuscript: all four of
+  `T_Mul`, `T_Sig`, `T_BF` and `N` *are* defined there, and `n_cand` does not
+  occur anywhere in the `.tex` at all. A stale finding in a findings list is
+  worse than no finding, because it costs the reader trust in the rest.
 
 ---
 
