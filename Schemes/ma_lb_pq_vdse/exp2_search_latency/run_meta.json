@@ -1,0 +1,88 @@
+{
+  "confidence": 0.95,
+  "config_hashes": {
+    "crypto.yaml": "c06971442ad96b97781ded9d2f93c6d02d1e1d7710698f255fa2b3ff05c51147",
+    "dataset.yaml": "32129d470aaaeee788960f431b092db599b78fb6c50675b0e4d05f192c5fd1ca",
+    "global.yaml": "ac5568611661bda29fe1dd77baeb0fc64b6dabfc77e5fff42c777e463ac25b2f",
+    "index.yaml": "2a6c44f9dad85067deb59f8514b8ed6b07cfeb1bd626b9ade04e0b2dd984feac",
+    "scheduler.yaml": "99132b7a4c3ba3edab9295ec38957ad635d22bbd5c7a7570922c1d1759d0da21",
+    "workload/exp78_sweep_holdout.yaml": "716c19ccacb1f1854f01d42f9d7740e77f87666736ff612c3b3829274c864fae",
+    "workload/exp78_workload.yaml": "7b2bef17d296639ed2afb1f552868a268e1f4e8bc2266162c378753deec5ed7c"
+  },
+  "corpus_sha256": "e56ca2d14b3b6438a231fa9d00c5970a91cd0085879fa214092efbb7f707d6a0",
+  "corpus_type": "synthea",
+  "crypto_backends": {
+    "blas_thread_env": {
+      "MKL_NUM_THREADS": "UNSET",
+      "NUMEXPR_NUM_THREADS": "UNSET",
+      "OMP_NUM_THREADS": "UNSET",
+      "OPENBLAS_NUM_THREADS": "UNSET"
+    },
+    "config_hashes": {
+      "crypto.yaml": "c06971442ad96b97781ded9d2f93c6d02d1e1d7710698f255fa2b3ff05c51147",
+      "dataset.yaml": "32129d470aaaeee788960f431b092db599b78fb6c50675b0e4d05f192c5fd1ca",
+      "global.yaml": "ac5568611661bda29fe1dd77baeb0fc64b6dabfc77e5fff42c777e463ac25b2f",
+      "index.yaml": "2a6c44f9dad85067deb59f8514b8ed6b07cfeb1bd626b9ade04e0b2dd984feac",
+      "scheduler.yaml": "99132b7a4c3ba3edab9295ec38957ad635d22bbd5c7a7570922c1d1759d0da21"
+    },
+    "cpu_count": 4,
+    "experiment_host": {
+      "detected_instance_type": "m6i.xlarge",
+      "expected_instance_type": null,
+      "host_check_satisfied": true,
+      "is_pinned_experiment_host": false,
+      "metadata_reachable": true,
+      "pin_configured": false,
+      "platform": "Linux-7.0.0-1011-aws-x86_64-with-glibc2.39"
+    },
+    "kem_backends_available": {
+      "cryptography": true,
+      "kyber_py": false,
+      "liboqs": true
+    },
+    "libraries": {
+      "cryptography": "50.0.0",
+      "mmh3": "unknown",
+      "numpy": "2.4.6",
+      "scipy": "1.17.1",
+      "yaml": "6.0.3"
+    },
+    "pairing_backends_available": {
+      "charm_ss512": true,
+      "charm_type3": true,
+      "petrelic_bn254": false
+    },
+    "platform": "Linux-7.0.0-1011-aws-x86_64-with-glibc2.39",
+    "python_implementation": "CPython",
+    "python_version": "3.11.15"
+  },
+  "dataset_records": null,
+  "experiment": "exp2_search_latency",
+  "finished_utc": "2026-09-03T05:39:24.897665+00:00",
+  "git_commit": "79a5739eab34c9395acd39d74e3c60b7b5413ead",
+  "instance_type": "unknown",
+  "libraries": {
+    "bitarray": "3.10.1",
+    "cryptography": "50.0.0",
+    "mmh3": "unknown",
+    "numpy": "2.4.6",
+    "pandas": "3.0.5",
+    "scipy": "1.17.1"
+  },
+  "not_reportable_because": [],
+  "notes": [],
+  "platform": "Linux-7.0.0-1011-aws-x86_64-with-glibc2.39",
+  "python_version": "3.11.15",
+  "reportable": true,
+  "runs": 10,
+  "scheme": "ma_lb_pq_vdse",
+  "started_utc": "2026-09-03T05:38:48.724461+00:00",
+  "thread_pinning": {
+    "MKL_NUM_THREADS": null,
+    "NUMEXPR_NUM_THREADS": null,
+    "OMP_NUM_THREADS": null,
+    "OPENBLAS_NUM_THREADS": null,
+    "VECLIB_MAXIMUM_THREADS": null
+  },
+  "warmups": 5
+}
