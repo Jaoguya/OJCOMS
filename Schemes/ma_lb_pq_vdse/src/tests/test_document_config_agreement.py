@@ -84,9 +84,9 @@ def _cited_paths(text: str):
     Three exclusions, each for a real reason rather than to make the test pass:
 
     * **``.md`` is excluded.** A document may legitimately record that another
-      document *was deleted* — ``SystemConfiguration.md`` §11 says its traps
-      were rescued from ``infra/SESSION_HANDOFF.md`` "before both were deleted",
-      which is history, not a broken link.
+      document *was deleted* — CLAUDE.md names four documents that no longer
+      exist, precisely so nobody recreates them, which is history rather than a
+      broken link.
     * **Globs are excluded.** ``Overleaf/*.tex`` names a pattern, not a file.
     * **``::`` is stripped.** ``sync/dias.py::synchronize`` cites a function.
     """
@@ -284,8 +284,10 @@ def test_no_source_file_cites_a_deleted_document():
     assert not offenders, (
         "these cite documents deleted in the 2026-09-07/08 cull: "
         + ", ".join(sorted(offenders))
-        + ". Cite the surviving section of SystemConfiguration.md, or keep the "
-        "decision reference and drop the path (see its section 8)."
+        + ". Cite the document that owns the claim -- skill.md for anything "
+        "operational, the scheme document for scheme specifics, global.yaml "
+        "for a configured value -- or keep the decision reference and drop "
+        "the path."
     )
 #: Any spelling of a reference to a section of the deleted ``README.md``:
 #: "README §5", "README's §7", "README section 5", and the mojibake "README S6"
@@ -305,8 +307,8 @@ def test_no_source_file_cites_a_section_of_the_deleted_readme():
 
     Facts a config file owns now cite that file (``global.yaml``,
     ``dataset.yaml``) so a wrong reference is checkable rather than merely
-    stale; the rest cite ``SystemConfiguration.md`` with no section number,
-    which cannot develop the same fault.
+    stale; the rest cite ``skill.md`` with no section number, which cannot
+    develop the same fault.
     """
     offenders = []
     for path in _source_files():
@@ -321,6 +323,6 @@ def test_no_source_file_cites_a_section_of_the_deleted_readme():
     assert not offenders, (
         "these cite a section of the deleted README.md: "
         + ", ".join(sorted(set(offenders)))
-        + ". Cite the config file that owns the value, or SystemConfiguration.md "
-        "with no section number."
+        + ". Cite the config file that owns the value, or skill.md with no "
+        "section number."
     )

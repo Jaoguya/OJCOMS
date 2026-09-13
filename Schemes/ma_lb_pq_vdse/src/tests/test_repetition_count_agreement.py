@@ -123,13 +123,20 @@ def test_no_source_file_still_quotes_the_old_count():
 #:
 #: A doc that prints a command is a doc someone copies onto a node.
 #: The five `SCHEME.md` files were deleted on 2026-09-08 along with fourteen
-#: other prose documents; `CLAUDE.md` and `SystemConfiguration.md` are the two
-#: that survive. The list is kept pointed at what exists rather than allowed to
-#: empty out, because an empty list here passes silently and this guard is the
-#: only thing that has ever caught a document printing a stale `--runs`.
+#: other prose documents. The list is kept pointed at what exists rather than
+#: allowed to empty out, because an empty list here passes silently and this
+#: guard is the only thing that has ever caught a document printing a stale
+#: `--runs`.
+#:
+#: `SystemConfiguration.md` -> `skill.md`, 2026-09-13. The former was deleted
+#: in 83b83ff and this list was not updated, so the guard silently HALVED: it
+#: scanned CLAUDE.md alone while skill.md -- the manual, and the document that
+#: actually prints `python3 -m Schemes... --runs 10` twice -- went unscanned.
+#: A guard that cannot empty out can still go half-blind, which is the same
+#: failure one file over.
 COMMAND_PRINTING_DOCS = (
-    "SystemConfiguration.md",
     "CLAUDE.md",
+    "skill.md",
 )
 
 
