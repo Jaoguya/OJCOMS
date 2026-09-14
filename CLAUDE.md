@@ -50,7 +50,11 @@ not need asking.
 runs** — measured on the campaign host at `sharding.replication: 2`, n = 10,
 `corpus_type: synthea`: Exps. 1, 3, 4(a), 5, 6, 7, 8. Two carve-outs:
 
-- **Exp. 2 was killed** on 2026-09-13; the proposed scheme has none.
+- **Exp. 2 was killed** as a rerun on 2026-09-13, then **restored from the
+  archive** the same day (`beef6b8`). The proposed scheme's series is
+  reportable but **pre-rebuild**: commit `79a5739e`, 2026-09-03, at
+  `sharding.replication: 1` — a different `index.yaml` from the campaign's.
+  Quote it with that provenance attached; do not describe it as campaign data.
 - **Exp. 4's `granularity` arm is not reportable**, deliberately — it ran on
   the in-process ledger because `tab:cost` prices verification at `O(r)T_BC`
   and at `r = 20,000` that is ~3M chain reads (~36 h) against a real peer.
